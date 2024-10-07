@@ -1,0 +1,30 @@
+FROM nvidia/cuda:11.3.1-devel-ubuntu20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt update
+RUN apt-get install -y \
+    libavcodec58 \
+    libavutil56 \
+    libavformat58 \
+    libswresample3 \
+    libavfilter7 \
+    libass9 \
+    ffmpeg \
+    wget && \
+    rm -rf /var/lib/apt/lists/*
+
+
+WORKDIR /
+
+# Copy cuda lib to /usr/lib
+RUN cp -rv /usr/local/cuda-11.3/compat/* /usr/lib/.
+
+RUN wget https://github.com/rigaya/NVEnc/releases/download/7.69/nvencc_7.69_Ubuntu20.04_amd64.deb
+
+RUN dpkg -i nvencc_7.69_Ubuntu20.04_amd64.deb && rm -rfv nvencc_7.69_Ubuntu20.04_amd64.deb
+
+COPY reencode /usr/sbin/reencode
+
+ENTRYPOINT ["/usr/bin/nvencc"]
+CMD ["--help"]
